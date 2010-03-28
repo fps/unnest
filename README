@@ -41,7 +41,7 @@ closing brackets.. Here's an example with curly brackets:
 
 unnest -s "`cat test2.txt`" -r "[\$level\1]" -o '{' -c '}'
 
-this transforms this:
+this transforms this (test2.txt):
 
 ---- cut here
 
