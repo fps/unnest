@@ -1,4 +1,4 @@
-./unnest -s "`cat test.txt`" -r "[\$level\1]"
+unnest -s "`cat test.txt`" -r "[\$level\1]"
 
 this transforms this (test.txt):
 
@@ -35,3 +35,45 @@ bla [1(]
 blubber
 
 ---- end cut here
+
+The previous example used the default regexp for opening and 
+closing brackets.. Here's an example with curly brackets:
+
+unnest -s "`cat test2.txt`" -r "[\$level\1]" -o '{' -c '}'
+
+this transforms this:
+
+---- cut here
+
+bla {
+	blub {
+
+	}
+	blablub {
+		foo {
+		}
+	}
+}
+
+blubber
+
+---- end cut here
+
+into this:
+
+---- cut here
+
+bla [1{]
+	blub [2{]
+
+	[2}]
+	blablub [2{]
+		foo [3{]
+		[3}]
+	[2}]
+[1}]
+
+blubber
+
+---- end cut here
+
