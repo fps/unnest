@@ -1,3 +1,15 @@
+- A simple tool to do something with nested brackets in text files :D
+
+- Requirements:
+
+Python
+
+- Installation:
+
+copy the unnest script to somewhere in your path
+
+- Usage examples
+
 unnest -s "`cat test.txt`" -r "[\$level\1]"
 
 this transforms this (test.txt):
@@ -76,4 +88,8 @@ bla [1{]
 blubber
 
 ---- end cut here
+
+- Author:
+
+Florian Paul Schmidt (mista.tapas@gmx.net)
 
