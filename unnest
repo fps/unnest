@@ -1,0 +1,135 @@
+#!/usr/bin/python
+
+import sys
+import getopt
+import re
+import string
+
+def usage():
+    print "meh!"
+    pass
+
+
+
+def replace_bracket(bracket, regexp, match):
+    """
+    Replaces the bracket with the corresponding regexp, where
+    the string "$level" is replaced in the regexp by the 
+    corresponding nesting level passed to the function
+    """
+    pattern = "(" + bracket + ")"
+    replaced = re.sub(pattern, regexp, match, 1) 
+    #print "replace_bracket " + pattern + " :: " + regexp + " :: " + bracket + " ::::  ",
+    #print replaced
+    return replaced
+
+
+def replace_level_in_regexp(regexp, level):
+    return re.sub('\$level', str(level), regexp);
+
+
+def replace_brackets(the_string, open_b, close_b, replace_regexp):
+    level = 0;
+    current_pos = 0;
+    the_new_string = ""
+
+    while True:
+        #print "----" + str(level)
+        open_pattern = re.compile(open_b)
+        close_pattern = re.compile(close_b)
+
+        match_open = open_pattern.search(the_string, current_pos)
+        match_close = close_pattern.search(the_string, current_pos)
+        if match_open != None:
+            next_open =  match_open.start()
+        else:
+            next_open = -1
+
+        if match_close != None:
+            next_close =  match_close.start()
+        else:
+            next_close = -1
+
+        #print next_open
+        #print next_close
+    
+        if next_open == -1 and next_close == -1:
+            if level == 0:
+                # print "success"
+                break
+            else:
+                print "indentation failure"
+                sys.exit(1)
+                break
+
+
+        if (next_close == -1 and next_open != -1) or ((next_open >= 0 and next_close >= 0) and (next_open < next_close)):
+            level += 1
+
+            the_new_string = the_new_string + the_string[current_pos:match_open.start()]
+            cur_regexp = replace_level_in_regexp(replace_regexp, level)
+            replaced_bracket = replace_bracket(open_b, cur_regexp, the_string[match_open.start():match_open.end()])
+            current_pos = match_open.end()
+            the_new_string = the_new_string + replaced_bracket
+            continue
+
+        if (next_open == -1 and next_close != -1) or ((next_open >= 0 and next_close >= 0) and (next_close < next_open)):
+            the_new_string = the_new_string + the_string[current_pos:match_close.start()]
+            cur_regexp = replace_level_in_regexp(replace_regexp, level)
+            replaced_bracket = replace_bracket(close_b, cur_regexp, the_string[match_close.start():match_close.end()])
+            current_pos = match_close.end()
+            the_new_string = the_new_string + replaced_bracket
+
+            level -= 1
+            continue
+
+        print "unnest seems to be buggy. aborting"
+        sys.exit(1)
+        break
+    the_new_string = the_new_string + the_string[current_pos:]
+    return the_new_string
+
+
+def main(argv):
+    try:
+        opts, args = getopt.getopt(
+            argv, 
+            "ho:c:r:s:", 
+            [
+                "help", 
+                "opening-bracket=", 
+                "closing-bracket=", 
+                "replace-regex=", 
+                "string="
+                ]
+            )
+
+        the_string = ""
+        opening_bracket="\\("
+        closing_bracket="\\)"
+        replace_regexp="[$level\\1]"
+
+        for opt, arg in opts:
+            if (opt in ("-h", "--help")):
+                usage()
+                sys.exit()
+            if (opt in ("-s", "--string")):
+                the_string = arg
+            if (opt in ("-o", "--opening-bracket")):
+                opening_bracket = arg
+            if (opt in ("-c", "--closing-bracket")):
+                closing_bracket = arg
+            if (opt in ("-r", "--replace-regexp")):
+                replace_regexp= arg
+
+        print replace_brackets(the_string, opening_bracket, closing_bracket, replace_regexp)
+
+    except getopt.GetoptError:
+        usage() 
+        sys.exit(2)                     
+
+
+
+if __name__ == "__main__":
+    #replace_brackets("(923429(,g,ehjgr(erg)(geargea)greg))", "(", ")")
+    main(sys.argv[1:])
