@@ -1,0 +1,2 @@
+./unnest -s "`cat test`" -r "[\1]"
+./unnest -s "`cat test`" -r "[\$level\1]"
